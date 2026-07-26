@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  ingestion-service:
+    build:
+      context: ./ingestion-service
+    ports:
+      - "8004:8004"
+    volumes:
+      - ./data:/app/data
+      - ./chroma_db:/app/chroma_db
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+
+  retrieval-service:
+    build:
+      context: ./retrieval-service
+    ports:
+      - "8005:8005"
+    volumes:
+      - ./chroma_db:/app/chroma_db
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+
+  generation-service:
+    build:
+      context: ./generation-service
+    ports:
+      - "8006:8006"
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - ingestion-service
+      - retrieval-service
+      - generation-service
